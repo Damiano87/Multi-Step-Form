@@ -1,13 +1,14 @@
 import { ChevronRight } from "lucide-react";
 import { useFormData } from "../context/hooks/useFormData";
 import { useState } from "react";
+import type { Errors } from "../../types/types";
 
-const PersonalInfoStep = ({ onNext }) => {
+const PersonalInfoStep = ({ onNext }: { onNext: () => void }) => {
   const { formData, updateFormData } = useFormData();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Errors>({});
 
   const validate = () => {
-    const newErrors = {};
+    const newErrors = {} as Errors;
     if (!formData.personalInfo.name.trim())
       newErrors.name = "Imię jest wymagane";
     if (!formData.personalInfo.email.includes("@"))
@@ -19,8 +20,15 @@ const PersonalInfoStep = ({ onNext }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const saveToLocalStorage = () => {
+    localStorage.setItem("formData", JSON.stringify(formData));
+  };
+
   const handleSubmit = () => {
-    if (validate()) onNext();
+    if (validate()) {
+      saveToLocalStorage();
+      onNext();
+    }
   };
 
   return (
@@ -82,6 +90,7 @@ const PersonalInfoStep = ({ onNext }) => {
         )}
       </div>
 
+      {/* submit button */}
       <button
         onClick={handleSubmit}
         className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"

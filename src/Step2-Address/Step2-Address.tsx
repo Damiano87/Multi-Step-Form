@@ -1,13 +1,19 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useFormData } from "../context/hooks/useFormData";
 import { useState } from "react";
+import type { Errors } from "../../types/types";
 
-const AddressStep = ({ onNext, onBack }) => {
+type AddressStepProps = {
+  onNext: () => void;
+  onBack: () => void;
+};
+
+const AddressStep = ({ onNext, onBack }: AddressStepProps) => {
   const { formData, updateFormData } = useFormData();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Errors>({});
 
   const validate = () => {
-    const newErrors = {};
+    const newErrors = {} as Errors;
     if (!formData.address.street.trim())
       newErrors.street = "Ulica jest wymagana";
     if (!formData.address.city.trim()) newErrors.city = "Miasto jest wymagane";
@@ -19,8 +25,15 @@ const AddressStep = ({ onNext, onBack }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const saveToLocalStorage = () => {
+    localStorage.setItem("formData", JSON.stringify(formData));
+  };
+
   const handleSubmit = () => {
-    if (validate()) onNext();
+    if (validate()) {
+      saveToLocalStorage();
+      onNext();
+    }
   };
 
   return (

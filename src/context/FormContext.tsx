@@ -1,17 +1,37 @@
-import React, { useState, createContext } from "react";
+import React, { useState } from "react";
+import { FormContext } from "./hooks/useFormData";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
-// Context do zarządzania stanem formularza
-export const FormContext = createContext(null);
+export type FormDataProps = {
+  personalInfo: { name: string; email: string; phone: string };
+  address: { street: string; city: string; postalCode: string };
+  preferences: { newsletter: boolean; notifications: boolean };
+};
 
-// Provider dla całego formularza
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {
-  const [formData, setFormData] = useState({
-    personalInfo: { name: "", email: "", phone: "" },
-    address: { street: "", city: "", postalCode: "" },
-    preferences: { newsletter: false, notifications: true },
-  });
+  const localStorageData = useLocalStorage();
 
-  const updateFormData = (step: string, data: string) => {
+  const [formData, setFormData] = useState<FormDataProps>(() => ({
+    personalInfo: {
+      name: localStorageData?.personalInfo?.name || "",
+      email: localStorageData?.personalInfo?.email || "",
+      phone: localStorageData?.personalInfo?.phone || "",
+    },
+    address: {
+      street: localStorageData?.address?.street || "",
+      city: localStorageData?.address?.city || "",
+      postalCode: localStorageData?.address?.postalCode || "",
+    },
+    preferences: {
+      newsletter: localStorageData?.preferences?.newsletter || false,
+      notifications: localStorageData?.preferences?.notifications || true,
+    },
+  }));
+
+  const updateFormData = <K extends keyof FormDataProps>(
+    step: K,
+    data: Partial<FormDataProps[K]>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [step]: { ...prev[step], ...data },
@@ -19,7 +39,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <FormContext.Provider value={{ formData, updateFormData }}>
+    <FormContext.Provider value={{ formData, setFormData, updateFormData }}>
       {children}
     </FormContext.Provider>
   );

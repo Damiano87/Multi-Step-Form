@@ -1,7 +1,12 @@
 import { Check, ChevronLeft } from "lucide-react";
 import { useFormData } from "../context/hooks/useFormData";
 
-const PreferencesStep = ({ onBack, onSubmit }) => {
+type PreferencesStepProps = {
+  onBack: () => void;
+  onSubmit: () => void;
+};
+
+const PreferencesStep = ({ onBack, onSubmit }: PreferencesStepProps) => {
   const { formData, updateFormData } = useFormData();
 
   return (

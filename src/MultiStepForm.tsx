@@ -1,44 +1,59 @@
-import { Check } from "lucide-react";
 import { useState } from "react";
 import ProgressIndicator from "./ProgressIndicator/ProgressIndicator";
 import PersonalInfoStep from "./Step1-PersonalInfo/Step1-PersonalInfo";
 import AddressStep from "./Step2-Address/Step2-Address";
 import PreferencesStep from "./Step3-Preferences/Step3-Preferences";
+import { useFormData } from "./context/hooks/useFormData";
+import { useGetCurrentPageFromLocalStorage } from "./context/hooks/useLocalStorage";
+import SuccessPage from "./SuccessPage/SuccessPage";
 
 export default function MultiStepForm() {
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const currentPage = useGetCurrentPageFromLocalStorage();
+  const [currentStep, setCurrentStep] = useState<number>(
+    parseInt(currentPage) || 0
+  );
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const { formData, setFormData } = useFormData();
 
   const steps = ["Dane osobowe", "Adres", "Preferencje"] as const;
 
-  const handleNext = () => setCurrentStep((prev) => prev + 1);
-  const handleBack = () => setCurrentStep((prev) => prev - 1);
+  const saveCurrentPageToLocalStorage = () => {
+    localStorage.setItem("currentPage", JSON.stringify(currentStep + 1));
+  };
+
+  const handleNext = () => {
+    setCurrentStep((prev) => prev + 1);
+    saveCurrentPageToLocalStorage();
+  };
+  const handleBack = () => {
+    setCurrentStep((prev) => prev - 1);
+    saveCurrentPageToLocalStorage();
+  };
 
   const handleSubmit = () => {
     setIsSubmitted(true);
+    console.log("Dane formularza: ", formData);
+
+    // Reset form data and localStorage after submission
+    localStorage.removeItem("formData");
+    localStorage.removeItem("currentPage");
+    setFormData({
+      personalInfo: { name: "", email: "", phone: "" },
+      address: { street: "", city: "", postalCode: "" },
+      preferences: { newsletter: false, notifications: true },
+    });
+
     console.log("Formularz wysłany!");
   };
 
+  console.log("Current step", currentStep);
+
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check size={40} className="text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Sukces!</h2>
-          <p className="text-gray-600">Formularz został pomyślnie wysłany.</p>
-          <button
-            onClick={() => {
-              setIsSubmitted(false);
-              setCurrentStep(0);
-            }}
-            className="mt-6 bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Wypełnij ponownie
-          </button>
-        </div>
-      </div>
+      <SuccessPage
+        setIsSubmitted={setIsSubmitted}
+        setCurrentStep={setCurrentStep}
+      />
     );
   }
 

@@ -1,5 +1,18 @@
-import { useContext } from "react";
-import { FormContext } from "../FormContext";
+import { createContext, useContext } from "react";
+import type { FormDataProps } from "../FormContext";
+
+type FormContextType = {
+  formData: FormDataProps;
+  setFormData: React.Dispatch<React.SetStateAction<FormDataProps>>;
+  updateFormData: <K extends keyof FormDataProps>(
+    step: K,
+    data: Partial<FormDataProps[K]>
+  ) => void;
+};
+
+export const FormContext = createContext<FormContextType | undefined>(
+  undefined
+);
 
 export const useFormData = () => {
   const context = useContext(FormContext);
