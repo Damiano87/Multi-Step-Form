@@ -46,8 +46,6 @@ export default function MultiStepForm() {
     console.log("Formularz wysłany!");
   };
 
-  console.log("Current step", currentStep);
-
   if (isSubmitted) {
     return (
       <SuccessPage
